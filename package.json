@@ -1,0 +1,20 @@
+{
+  "name": "polymarket-keeperhub-redeemer",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --import tsx --test test/*.test.ts",
+    "typecheck": "tsc -p .",
+    "cli": "tsx src/cli.ts"
+  },
+  "license": "MIT",
+  "description": "Redeem resolved Polymarket positions through a reviewed, dry-run KeeperHub workflow",
+  "type": "module",
+  "dependencies": {
+    "viem": "^2.56.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.0",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
