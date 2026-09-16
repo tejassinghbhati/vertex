@@ -56,7 +56,22 @@ npm run cli preflight -- --plan workflows/<f>    # read the chain for what the p
 npm run cli deploy -- --plan workflows/<f>       # create it on KeeperHub, disabled
 npm run cli dry-run -- --plan workflows/<f>      # simulate, nothing is broadcast
 npm run cli arm -- --plan workflows/<f>          # enable the trigger
+npm run cli run -- --plan workflows/<f>          # execute now and wait for the receipt
+
+npm run cli status                               # the audit trail as a table
+npm run cli dashboard                            # the same, as a self-contained page
 ```
+
+Every run is appended to `audit/runs.json` keyed by execution id, so a run that
+was `unconfirmed` when first seen and `success` later is one row, not two. What
+a redemption paid is decoded from the `PayoutRedemption` log on the receipt
+rather than taken from the workflow's own report, so the number in the audit
+trail is one the chain will confirm.
+
+`dashboard` writes [docs/dashboard.html](docs/dashboard.html): reviewed hashes,
+the node chain with the redeem call's literal arguments, the run table, and a
+live contract check run at generation time. It is self-contained, so it opens
+without credentials or a network connection.
 
 `deploy` refuses to create a workflow whose hash differs from the reviewed
 plan, and `dry-run` re-reads the deployed workflow and compares it against the

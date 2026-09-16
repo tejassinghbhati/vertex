@@ -1,0 +1,296 @@
+<title>Redemption Ledger</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+:root {
+  --ground: #F1F3F7;
+  --surface: #FFFFFF;
+  --line: #DCE1EA;
+  --ink: #10131A;
+  --muted: #5A6377;
+  --accent: #2D4A7C;
+  --accent-soft: #E7EDF7;
+  --ok: #0F7B52;
+  --ok-soft: #E3F1EA;
+  --warn: #8A6100;
+  --warn-soft: #F7EEDB;
+  --crit: #B3261E;
+  --crit-soft: #FAE7E5;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0C0F16;
+    --surface: #151A24;
+    --line: #252C3A;
+    --ink: #E7EAF2;
+    --muted: #98A1B5;
+    --accent: #9BB6E8;
+    --accent-soft: #1B2436;
+    --ok: #57C08A;
+    --ok-soft: #14261E;
+    --warn: #D9A521;
+    --warn-soft: #2A2214;
+    --crit: #F08279;
+    --crit-soft: #2C1917;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0C0F16;
+  --surface: #151A24;
+  --line: #252C3A;
+  --ink: #E7EAF2;
+  --muted: #98A1B5;
+  --accent: #9BB6E8;
+  --accent-soft: #1B2436;
+  --ok: #57C08A;
+  --ok-soft: #14261E;
+  --warn: #D9A521;
+  --warn-soft: #2A2214;
+  --crit: #F08279;
+  --crit-soft: #2C1917;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.55;
+  margin: 0;
+}
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-inline: 20px;
+  padding-block: 40px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 15px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); }
+h3 { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
+p { margin: 0; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.lede { max-width: 66ch; color: var(--muted); font-size: 17px; }
+.section { display: flex; flex-direction: column; gap: 14px; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tile .figure { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 27px; font-weight: 500; letter-spacing: -0.02em; }
+.tile .caption { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.tile.live .figure { color: var(--accent); }
+
+.plan { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.plan-head { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline; justify-content: space-between; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+.meta .mono { color: var(--ink); }
+
+.chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+.step { flex: 1 1 170px; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 5px; background: var(--ground); }
+.step .kind { font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); }
+.step .name { font-family: var(--display); font-weight: 600; font-size: 14px; }
+.step .detail { font-family: var(--mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+.step.writes { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 1px 0 var(--accent) inset; }
+.arrow { align-self: center; color: var(--muted); font-family: var(--mono); }
+
+.args { border-left: 2px solid var(--accent); padding-left: 14px; display: flex; flex-direction: column; gap: 3px; }
+.args .arg { font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+.args .arg .label { color: var(--muted); }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.crit { background: var(--crit-soft); color: var(--crit); }
+.pill.idle { background: var(--accent-soft); color: var(--accent); }
+
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-family: var(--display); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+tr:last-child td { border-bottom: none; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+td.mono { font-family: var(--mono); font-size: 12.5px; }
+
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+.empty ul { margin: 0; padding-left: 20px; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+
+.checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 0 26px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px 20px; }
+.check { display: flex; gap: 10px; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.check:last-child { border-bottom: none; }
+.check .mark { font-family: var(--mono); font-size: 12px; color: var(--ok); }
+.check.bad .mark { color: var(--crit); }
+.check .what { font-size: 13.5px; }
+.check .detail { font-family: var(--mono); font-size: 11.5px; color: var(--muted); overflow-wrap: anywhere; }
+
+footer { color: var(--muted); font-size: 12.5px; display: flex; flex-direction: column; gap: 5px; }
+@media (max-width: 640px) {
+  .arrow { display: none; }
+  .step { flex-basis: 100%; }
+}
+</style>
+
+<div class="page">
+  <header class="section">
+    <h1>Redemption Ledger</h1>
+    <p class="lede">A resolved Polymarket market is a settled decision nobody has executed yet. This is the execution record: what was reviewed, what was dry run, and what actually moved on Polygon.</p>
+  </header>
+
+  <section class="section">
+    <h2>State</h2>
+    <div class="tiles">
+      <div class="tile live">
+        <span class="figure">0.000000</span>
+        <span class="caption">pUSD redeemed</span>
+      </div>
+      <div class="tile">
+        <span class="figure">0</span>
+        <span class="caption">Redemptions</span>
+      </div>
+      <div class="tile">
+        <span class="figure">0</span>
+        <span class="caption">Runs recorded</span>
+      </div>
+      <div class="tile">
+        <span class="figure">12/12</span>
+        <span class="caption">Contract checks passing</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Reviewed workflows</h2>
+    <article class="plan">
+      <div class="plan-head">
+        <h3>Credible FDV above $100M one day after launch?</h3>
+        <span class="pill idle">Not deployed</span>
+      </div>
+      <div class="meta">
+        <span>Condition <span class="mono">0x0c481aa6…e4eae0</span></span>
+        <span>Market type <span class="mono">standard</span></span>
+        <span>Reviewed hash <span class="mono">a9c1b99acf…b5636a</span></span>
+        
+        <span>Plan <span class="mono">docs\example-plan.json</span></span>
+      </div>
+
+      <div class="chain">
+        <div class="step">
+          <span class="kind">Schedule</span>
+          <span class="name">Schedule</span>
+          <span class="detail">*/10 * * * *</span>
+        </div>
+        <span class="arrow">&rarr;</span>
+        <div class="step">
+          <span class="kind">web3/read-contract</span>
+          <span class="name">Read Payout Denominator</span>
+          <span class="detail">payoutDenominator @ 0x4D97DCd9…476045</span>
+        </div>
+        <span class="arrow">&rarr;</span>
+        <div class="step">
+          <span class="kind">Condition</span>
+          <span class="name">Market Resolved</span>
+          <span class="detail">{{@read-payout-denominator:Read Payout Denominator.result}} &gt; 0</span>
+        </div>
+        <span class="arrow">&rarr;</span>
+        <div class="step writes">
+          <span class="kind">web3/write-contract</span>
+          <span class="name">Redeem Polymarket Payout</span>
+          <span class="detail">redeemPositions @ 0xAdA100Db…8FcE1f</span>
+        </div>
+      </div>
+
+      <div class="args">
+        <span class="arg"><span class="label">collateralToken</span> 0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB</span>
+        <span class="arg"><span class="label">parentCollectionId</span> 0x0000000000000000000000000000000000000000000000000000000000000000</span>
+        <span class="arg"><span class="label">conditionId</span> 0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0</span>
+        <span class="arg"><span class="label">indexSets</span> [1, 2]</span>
+      </div>
+      <p class="meta">Every argument above is a literal in the reviewed file. Nothing is templated, so the dry run covers the call that executes.</p>
+    </article>
+  </section>
+
+  <section class="section">
+    <h2>Runs</h2>
+    <div class="empty">
+      <h3>Nothing has executed yet</h3>
+      <p class="lede">No run is recorded, so no value has moved. This page states that rather than showing a sample row, because the point of it is proof.</p>
+      <ul>
+        <li>Needs a KeeperHub organization key (<span class="mono">kh_</span>) to deploy and execute.</li>
+        <li>Needs pUSD on the organization's Turnkey wallet to hold a position worth redeeming.</li>
+        <li>Contract verification below runs without either, and passes today.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Contract verification</h2>
+    <div class="checks">
+      <div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">conditionalTokens is a contract</span><br><span class="detail">0x4D97DCd97eC945f40cF65F87097ACe5EA0476045 has 15007 bytes of code</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">pUSD is a contract</span><br><span class="detail">0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB has 61 bytes of code</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">ctfCollateralAdapter is a contract</span><br><span class="detail">0xAdA100Db00Ca00073811820692005400218FcE1f has 11096 bytes of code</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">negRiskCtfCollateralAdapter is a contract</span><br><span class="detail">0xadA2005600Dec949baf300f4C6120000bDB6eAab has 13890 bytes of code</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">standard adapter points at the expected CTF</span><br><span class="detail">CONDITIONAL_TOKENS() = 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">standard adapter points at pUSD</span><br><span class="detail">COLLATERAL_TOKEN() = 0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">standard adapter uses the expected USDC.e</span><br><span class="detail">USDCE() = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">standard adapter is not paused</span><br><span class="detail">paused(USDC.e) = false</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">neg-risk adapter points at the expected CTF</span><br><span class="detail">CONDITIONAL_TOKENS() = 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">neg-risk adapter points at pUSD</span><br><span class="detail">COLLATERAL_TOKEN() = 0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">neg-risk adapter uses the expected USDC.e</span><br><span class="detail">USDCE() = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174</span></span>
+      </div>
+<div class="check">
+        <span class="mark">OK</span>
+        <span><span class="what">neg-risk adapter is not paused</span><br><span class="detail">paused(USDC.e) = false</span></span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Generated 2026-09-16T12:18:38.770Z by <span class="mono">npm run cli dashboard</span>. Contract checks read Polygon mainnet live at generation time; run rows are copied from KeeperHub execution receipts and payouts are decoded from the <span class="mono">PayoutRedemption</span> log.</p>
+    <p>Polymarket contracts per <a href="https://docs.polymarket.com/resources/contracts">docs.polymarket.com/resources/contracts</a>. Execution through <a href="https://docs.keeperhub.com/">KeeperHub</a>.</p>
+  </footer>
+</div>

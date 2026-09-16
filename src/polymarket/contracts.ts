@@ -32,6 +32,7 @@ export const collateralAdapterAbi = parseAbi([
 // Source: gnosis/conditional-tokens-contracts contracts/ConditionalTokens.sol.
 export const conditionalTokensAbi = parseAbi([
   "event ConditionResolution(bytes32 indexed conditionId, address indexed oracle, bytes32 indexed questionId, uint256 outcomeSlotCount, uint256[] payoutNumerators)",
+  "event PayoutRedemption(address indexed redeemer, address indexed collateralToken, bytes32 indexed parentCollectionId, bytes32 conditionId, uint256[] indexSets, uint256 payout)",
   "function payoutDenominator(bytes32 conditionId) view returns (uint256)",
   "function getOutcomeSlotCount(bytes32 conditionId) view returns (uint256)",
   "function balanceOf(address owner, uint256 id) view returns (uint256)",

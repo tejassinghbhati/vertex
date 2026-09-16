@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { dirname, join } from "node:path";
 import { KeeperHubClient, type WorkflowDefinition } from "./keeperhub/client.js";
@@ -10,6 +10,9 @@ import { ctfResolutionEvent } from "./resolution/ctf-resolution-event.js";
 import { compose, workflowHash } from "./workflow/compose.js";
 import { approvalWorkflow, splitWorkflow } from "./workflow/setup.js";
 import { marketPreflight, polygonClient, verifyContracts, type Check } from "./chain/preflight.js";
+import { redeemedPayout } from "./chain/payout-value.js";
+import { appendRun, formatPusd, loadAudit, summarize } from "./audit/record.js";
+import { renderDashboard, type PlanLike } from "./audit/dashboard.js";
 import type { ResolutionSource } from "./resolution/types.js";
 
 try {
@@ -51,6 +54,10 @@ async function main() {
       return await cmdArm(flags, false);
     case "run":
       return await cmdRun(flags);
+    case "status":
+      return cmdStatus();
+    case "dashboard":
+      return await cmdDashboard(flags);
     case "setup-approval":
       return await cmdSetup(approvalWorkflow(flags.negrisk === "true"), flags);
     case "setup-split":
@@ -73,6 +80,8 @@ function usage() {
   arm --plan <file>                       enable the trigger
   disarm --plan <file>                    disable the trigger
   run --plan <file>                       execute now and wait for the receipt
+  status                                  print the audit trail: runs, statuses, hashes, payouts
+  dashboard [--out docs/dashboard.html]   write the audit trail as a self-contained page
   setup-approval [--negrisk true]         approve the adapter to move outcome tokens
   setup-split --condition <0x..> --amount <pUSD>
                                           split pUSD into a position, for a demo
@@ -192,7 +201,70 @@ async function cmdArm(flags: Flags, enabled: boolean) {
 async function cmdRun(flags: Flags) {
   const { plan, file } = readPlanWithPath(flags);
   const id = requireDeployment(plan, file);
-  await executeAndReport(KeeperHubClient.fromEnv(), id);
+  await executeAndReport(KeeperHubClient.fromEnv(), id, {
+    label: plan.workflow.name,
+    planFile: file,
+    reviewedHash: plan.hash,
+    conditionId: plan.market.conditionId,
+  });
+}
+
+function cmdStatus() {
+  const audit = loadAudit();
+  const s = summarize(audit);
+
+  if (!audit.runs.length) {
+    console.log("No runs recorded yet. Nothing has executed, so no value has moved.");
+    return;
+  }
+
+  console.log("recorded (UTC)       run                   status      tx                         pUSD");
+  for (const run of audit.runs) {
+    const tx = run.transactions[0];
+    console.log(
+      [
+        run.recordedAt.replace("T", " ").slice(0, 19),
+        run.executionId.padEnd(21),
+        run.status.padEnd(11),
+        (tx ? `${tx.hash.slice(0, 14)}...${tx.verified === false ? " unverified" : ""}` : "-").padEnd(26),
+        run.payoutBaseUnits ? formatPusd(BigInt(run.payoutBaseUnits)) : "-",
+      ].join(" "),
+    );
+    if (run.error) console.log(`  error: ${run.error}`);
+  }
+  console.log(
+    `\n${s.runs} run(s), ${s.succeeded} succeeded, ${s.failed} not, ${s.redemptions} redemption(s), ${formatPusd(s.payoutBaseUnits)} pUSD moved`,
+  );
+  for (const run of audit.runs.flatMap((r) => r.transactions)) {
+    console.log(`  https://polygonscan.com/tx/${run.hash}`);
+  }
+}
+
+async function cmdDashboard(flags: Flags) {
+  const out = flags.out ?? join("docs", "dashboard.html");
+  const plans: { file: string; plan: PlanLike }[] = [];
+
+  for (const dir of [PLAN_DIR, "docs"]) {
+    if (!existsSync(dir)) continue;
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith(".json")) continue;
+      const file = join(dir, name);
+      try {
+        const parsed = JSON.parse(readFileSync(file, "utf8")) as PlanLike;
+        if (parsed.workflow?.nodes && parsed.market?.conditionId) plans.push({ file, plan: parsed });
+      } catch {
+        // Not a plan file; the docs directory holds other JSON too.
+      }
+    }
+  }
+
+  // Checks are read live so the page cannot claim a verification it did not do.
+  const checks = await verifyContracts(polygonClient());
+  const html = renderDashboard({ generatedAt: new Date().toISOString(), audit: loadAudit(), plans, checks });
+
+  mkdirSync(dirname(out), { recursive: true });
+  writeFileSync(out, html);
+  console.log(`Wrote ${out} (${plans.length} plan(s), ${loadAudit().runs.length} run(s), ${checks.filter((c) => c.ok).length}/${checks.length} checks passing)`);
 }
 
 async function cmdSetup(workflow: WorkflowDefinition, flags: Flags) {
@@ -206,7 +278,7 @@ async function cmdSetup(workflow: WorkflowDefinition, flags: Flags) {
   console.log(`Created ${created.id}`);
   const sim = await client.simulateWorkflow(created.id);
   for (const w of sim.warnings ?? []) console.log(`  [${w.code}] ${w.nodeId}: ${w.message}`);
-  await executeAndReport(client, created.id);
+  await executeAndReport(client, created.id, { label: workflow.name });
 }
 
 async function cmdSetupSplit(flags: Flags) {
@@ -217,7 +289,11 @@ async function cmdSetupSplit(flags: Flags) {
   await cmdSetup(splitWorkflow({ conditionId: market.conditionId, negRisk: market.negRisk, amountBaseUnits }), flags);
 }
 
-async function executeAndReport(client: KeeperHubClient, workflowId: string) {
+async function executeAndReport(
+  client: KeeperHubClient,
+  workflowId: string,
+  context: { label: string; planFile?: string; reviewedHash?: string; conditionId?: string },
+) {
   const { executionId } = await client.executeWorkflow(workflowId, randomUUID());
   console.log(`Execution ${executionId} started`);
   const receipt = await client.waitForExecution(executionId);
@@ -226,6 +302,48 @@ async function executeAndReport(client: KeeperHubClient, workflowId: string) {
     console.log(`  ${tx.nodeName ?? tx.nodeId}: https://polygonscan.com/tx/${tx.hash}${tx.verified === false ? " (unverified)" : ""}`);
   }
   if (receipt.error) console.log(`Error: ${receipt.error}`);
+
+  // What the run paid out is read from the chain, not from the run's own
+  // report, so the audit trail states an amount it can defend.
+  let payoutBaseUnits: string | undefined;
+  const firstTx = receipt.transactionHashes?.[0];
+  if (firstTx) {
+    try {
+      const payout = await redeemedPayout(
+        polygonClient(),
+        firstTx.hash as `0x${string}`,
+        context.conditionId as `0x${string}` | undefined,
+      );
+      if (payout) {
+        payoutBaseUnits = payout.payoutBaseUnits.toString();
+        console.log(`Redeemed ${formatPusd(payout.payoutBaseUnits)} pUSD`);
+      }
+    } catch (error) {
+      console.log(`Could not read the payout from the receipt: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
+  appendRun({
+    recordedAt: new Date().toISOString(),
+    label: context.label,
+    workflowId,
+    executionId,
+    status: receipt.status,
+    reviewedHash: context.reviewedHash,
+    conditionId: context.conditionId,
+    planFile: context.planFile,
+    transactions: (receipt.transactionHashes ?? []).map((tx) => ({
+      hash: tx.hash,
+      nodeId: tx.nodeId,
+      nodeName: tx.nodeName,
+      verified: tx.verified,
+      receiptStatus: tx.receiptStatus,
+    })),
+    error: receipt.error,
+    payoutBaseUnits,
+  });
+  console.log("Recorded in audit/runs.json");
+
   // Anything other than success is a failure, including system_error and cancelled.
   if (receipt.status !== "success") process.exitCode = 1;
 }
