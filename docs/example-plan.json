@@ -1,0 +1,116 @@
+{
+  "hash": "a9c1b99acf8584f2ab34c776efcab9e6caaf55e69a44cd155bfb0388f5b5636a",
+  "market": {
+    "conditionId": "0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0",
+    "question": "Credible FDV above $100M one day after launch?",
+    "negRisk": false,
+    "slug": "credible-fdv-above-100m-one-day-after-launch-20260708144505957"
+  },
+  "wallet": "0x0000000000000000000000000000000000000001",
+  "resolution": {
+    "kind": "ctf-payout-poll",
+    "describes": "Conditional Tokens 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045 payoutDenominator(0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0) > 0, checked on cron \"*/10 * * * *\"",
+    "caveats": [
+      "Polling resolves no faster than the cron interval; a redemption has no deadline, so lag costs nothing but time.",
+      "Every tick is a billed execution, including ticks where the market has not resolved."
+    ]
+  },
+  "payout": {
+    "kind": "polymarket-redeem",
+    "describes": "redeemPositions(0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0) on the standard adapter 0xAdA100Db00Ca00073811820692005400218FcE1f for market \"Credible FDV above $100M one day after launch?\" paying pUSD to 0x0000000000000000000000000000000000000001"
+  },
+  "workflow": {
+    "name": "Redeem: Credible FDV above $100M one day after launch?",
+    "description": "When: Conditional Tokens 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045 payoutDenominator(0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0) > 0, checked on cron \"*/10 * * * *\" | Then: redeemPositions(0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0) on the standard adapter 0xAdA100Db00Ca00073811820692005400218FcE1f for market \"Credible FDV above $100M one day after launch?\" paying pUSD to 0x0000000000000000000000000000000000000001 | Authored by ctf-payout-poll + polymarket-redeem.",
+    "nodes": [
+      {
+        "id": "trigger",
+        "type": "trigger",
+        "data": {
+          "label": "Schedule",
+          "config": {
+            "triggerType": "Schedule",
+            "scheduleCron": "*/10 * * * *"
+          }
+        }
+      },
+      {
+        "id": "read-payout-denominator",
+        "type": "action",
+        "data": {
+          "label": "Read Payout Denominator",
+          "description": "Zero until the oracle reports payouts for this condition",
+          "config": {
+            "actionType": "web3/read-contract",
+            "network": "137",
+            "contractAddress": "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045",
+            "abi": "[{\"name\":\"ConditionResolution\",\"type\":\"event\",\"inputs\":[{\"type\":\"bytes32\",\"name\":\"conditionId\",\"indexed\":true},{\"type\":\"address\",\"name\":\"oracle\",\"indexed\":true},{\"type\":\"bytes32\",\"name\":\"questionId\",\"indexed\":true},{\"type\":\"uint256\",\"name\":\"outcomeSlotCount\"},{\"type\":\"uint256[]\",\"name\":\"payoutNumerators\"}]},{\"name\":\"payoutDenominator\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[{\"type\":\"bytes32\",\"name\":\"conditionId\"}],\"outputs\":[{\"type\":\"uint256\"}]},{\"name\":\"getOutcomeSlotCount\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[{\"type\":\"bytes32\",\"name\":\"conditionId\"}],\"outputs\":[{\"type\":\"uint256\"}]},{\"name\":\"balanceOf\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[{\"type\":\"address\",\"name\":\"owner\"},{\"type\":\"uint256\",\"name\":\"id\"}],\"outputs\":[{\"type\":\"uint256\"}]},{\"name\":\"isApprovedForAll\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[{\"type\":\"address\",\"name\":\"owner\"},{\"type\":\"address\",\"name\":\"operator\"}],\"outputs\":[{\"type\":\"bool\"}]},{\"name\":\"setApprovalForAll\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[{\"type\":\"address\",\"name\":\"operator\"},{\"type\":\"bool\",\"name\":\"approved\"}],\"outputs\":[]},{\"name\":\"getCollectionId\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[{\"type\":\"bytes32\",\"name\":\"parentCollectionId\"},{\"type\":\"bytes32\",\"name\":\"conditionId\"},{\"type\":\"uint256\",\"name\":\"indexSet\"}],\"outputs\":[{\"type\":\"bytes32\"}]},{\"name\":\"getPositionId\",\"type\":\"function\",\"stateMutability\":\"pure\",\"inputs\":[{\"type\":\"address\",\"name\":\"collateralToken\"},{\"type\":\"bytes32\",\"name\":\"collectionId\"}],\"outputs\":[{\"type\":\"uint256\"}]}]",
+            "abiFunction": "payoutDenominator",
+            "functionArgs": "[\"0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0\"]"
+          }
+        }
+      },
+      {
+        "id": "gate-resolved",
+        "type": "action",
+        "data": {
+          "label": "Market Resolved",
+          "config": {
+            "actionType": "Condition",
+            "condition": "{{@read-payout-denominator:Read Payout Denominator.result}} > 0",
+            "conditionConfig": {
+              "group": {
+                "id": "gate-resolved-group",
+                "logic": "AND",
+                "rules": [
+                  {
+                    "id": "gate-resolved-resolved",
+                    "leftOperand": "{{@read-payout-denominator:Read Payout Denominator.result}}",
+                    "operator": ">",
+                    "rightOperand": "0"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "payout",
+        "type": "action",
+        "data": {
+          "label": "Redeem Polymarket Payout",
+          "description": "Redeem resolved position and receive pUSD: Credible FDV above $100M one day after launch?",
+          "config": {
+            "actionType": "web3/write-contract",
+            "network": "137",
+            "web3Connection": "default",
+            "contractAddress": "0xAdA100Db00Ca00073811820692005400218FcE1f",
+            "abi": "[{\"name\":\"redeemPositions\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[{\"type\":\"address\",\"name\":\"collateralToken\"},{\"type\":\"bytes32\",\"name\":\"parentCollectionId\"},{\"type\":\"bytes32\",\"name\":\"conditionId\"},{\"type\":\"uint256[]\",\"name\":\"indexSets\"}],\"outputs\":[]},{\"name\":\"splitPosition\",\"type\":\"function\",\"stateMutability\":\"nonpayable\",\"inputs\":[{\"type\":\"address\",\"name\":\"collateralToken\"},{\"type\":\"bytes32\",\"name\":\"parentCollectionId\"},{\"type\":\"bytes32\",\"name\":\"conditionId\"},{\"type\":\"uint256[]\",\"name\":\"partition\"},{\"type\":\"uint256\",\"name\":\"amount\"}],\"outputs\":[]},{\"name\":\"paused\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[{\"type\":\"address\",\"name\":\"asset\"}],\"outputs\":[{\"type\":\"bool\"}]},{\"name\":\"USDCE\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[],\"outputs\":[{\"type\":\"address\"}]},{\"name\":\"COLLATERAL_TOKEN\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[],\"outputs\":[{\"type\":\"address\"}]},{\"name\":\"CONDITIONAL_TOKENS\",\"type\":\"function\",\"stateMutability\":\"view\",\"inputs\":[],\"outputs\":[{\"type\":\"address\"}]}]",
+            "abiFunction": "redeemPositions",
+            "functionArgs": "[\"0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB\",\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0\",[\"1\",\"2\"]]",
+            "failOnError": true
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "id": "trigger->read-payout-denominator",
+        "source": "trigger",
+        "target": "read-payout-denominator"
+      },
+      {
+        "id": "read-payout-denominator->gate-resolved",
+        "source": "read-payout-denominator",
+        "target": "gate-resolved"
+      },
+      {
+        "id": "gate-resolved->payout:true",
+        "source": "gate-resolved",
+        "target": "payout",
+        "sourceHandle": "true"
+      }
+    ]
+  }
+}

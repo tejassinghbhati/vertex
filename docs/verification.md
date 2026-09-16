@@ -58,6 +58,21 @@ USDC.e address, which is why `preflight` computes them with `USDCE()`.
 **Redemption has no deadline.** Winning tokens stay redeemable indefinitely, so
 a polling trigger that lags behind resolution costs time and nothing else.
 
+**Not every market waits two hours for UMA.** The docs describe the UMA
+optimistic oracle path, roughly two hours from proposal when undisputed. The
+short "Up or Down" crypto markets do not use it: six markets ending
+2026-09-16T11:10:00Z were all resolved on chain at 11:10:54Z, a lag of 0.9
+minutes, reported by oracle `0x58e1745bEDdA7312c4CddB72618923dA1B90eFde`
+rather than a UMA CTF adapter. `ConditionResolution` from the CTF is the same
+signal either way, which is why the resolution source watches the CTF and not
+any particular oracle. It also makes a live end-to-end demo take minutes
+instead of hours.
+
+In a 4,000-block sample the resolving oracles were
+`0x65070BE91477460D8A7AeEb94ef92fe056C2f2A7` (871 events), the CLOB v1 neg-risk
+adapter `0xd91E80cF2E7be2e162c6513ceD06f1dD0dA35296` (472) and
+`0x58e1745bEDdA7312c4CddB72618923dA1B90eFde` (224).
+
 ## KeeperHub behaviour that shaped the build
 
 **The Event trigger cannot filter on event arguments.** `workflow-mapper.ts` in

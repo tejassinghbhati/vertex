@@ -63,7 +63,14 @@ plan, and `dry-run` re-reads the deployed workflow and compares it against the
 same hash. That is what makes "the exact reviewed workflow executes" a check
 rather than a claim.
 
-To make a position to redeem in a demo, `setup-approval` approves the adapter
+[`docs/example-plan.json`](docs/example-plan.json) is a plan authored this way,
+against a resolved market with a placeholder wallet, so the review step can be
+read without an account. `plan --wallet 0x...` authors one without credentials.
+
+For a demo that finishes while someone is watching, use one of the five-minute
+"Up or Down" crypto markets: they resolve on chain about a minute after they
+end, rather than taking the two-hour UMA path. To make a position to redeem,
+`setup-approval` approves the adapter
 and `setup-split` splits a tiny amount of pUSD into one YES and one NO token.
 Both run as KeeperHub workflows, so every transaction this project makes lands
 in the same audit trail. `setup-split` refuses amounts above 5 pUSD.

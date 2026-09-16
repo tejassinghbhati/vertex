@@ -66,7 +66,7 @@ function usage() {
 
   verify                                  check every contract address against Polygon
   plan --slug <s> | --condition <0x..>    author the workflow and write it to ${PLAN_DIR}/
-       [--source poll|event] [--cron "*/10 * * * *"]
+       [--source poll|event] [--cron "*/10 * * * *"] [--wallet 0x..]
   preflight --plan <file>                 read the chain for everything the plan depends on
   deploy --plan <file>                    create the reviewed workflow on KeeperHub, disabled
   dry-run --plan <file>                   simulate the deployed workflow, nothing is broadcast
@@ -88,7 +88,11 @@ async function cmdVerify() {
 
 async function cmdPlan(flags: Flags) {
   const market = await resolveMarket(flags);
-  const wallet = await KeeperHubClient.fromEnv().walletAddress();
+  // --wallet lets anyone author and review a plan without KeeperHub
+  // credentials; without it the organization wallet is looked up.
+  const wallet = flags.wallet
+    ? (requireAddress(flags.wallet) as `0x${string}`)
+    : await KeeperHubClient.fromEnv().walletAddress();
 
   const source = flags.source ?? "poll";
   const resolution: ResolutionSource =
@@ -230,6 +234,11 @@ async function resolveMarket(flags: Flags): Promise<Market> {
   if (flags.slug) return fetchMarketBySlug(flags.slug);
   if (flags.condition) return fetchMarketByConditionId(flags.condition);
   throw new Error("plan needs --slug <market-slug> or --condition <0x...>");
+}
+
+function requireAddress(value: string): string {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(value)) throw new Error(`Not an address: ${value}`);
+  return value;
 }
 
 function requireDeployment(plan: Plan, file: string): string {
