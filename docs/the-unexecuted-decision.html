@@ -1,0 +1,440 @@
+<title>The Unexecuted Decision</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  :root {
+    --paper: #FAFAF9;
+    --raised: #FFFFFF;
+    --ink: #17191C;
+    --muted: #6B7078;
+    --hairline: #E3E2DE;
+    --accent: #31507E;
+    --accent-wash: #EDF1F7;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --label: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0E1013;
+      --raised: #15181D;
+      --ink: #E7E8EA;
+      --muted: #969BA4;
+      --hairline: #262A31;
+      --accent: #9CB4DF;
+      --accent-wash: #171C25;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #0E1013;
+    --raised: #15181D;
+    --ink: #E7E8EA;
+    --muted: #969BA4;
+    --hairline: #262A31;
+    --accent: #9CB4DF;
+    --accent-wash: #171C25;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.68;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .label {
+    font-family: var(--label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Masthead ---------------------------------------------------------- */
+
+  .masthead {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 10;
+    background: var(--paper);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .masthead-inner {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding: 13px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 24px;
+  }
+
+  .wordmark {
+    font-family: var(--label);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .wordmark span { color: var(--accent); }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+  }
+
+  nav a {
+    font-family: var(--label);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+  }
+
+  nav a:hover { color: var(--ink); border-bottom-color: var(--accent); }
+
+  /* Shell ------------------------------------------------------------- */
+
+  .wrap {
+    max-width: 62rem;
+    margin: 0 auto;
+    padding-inline: 24px;
+  }
+
+  .measure { max-width: 39rem; }
+
+  section { padding-block: 60px; border-bottom: 1px solid var(--hairline); }
+  section:last-of-type { border-bottom: 0; }
+
+  h1 {
+    font-size: clamp(34px, 6.4vw, 52px);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.024em;
+    text-wrap: balance;
+    margin: 14px 0 20px;
+  }
+
+  h2 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+    line-height: 1.28;
+    text-wrap: balance;
+    margin: 0 0 18px;
+  }
+
+  h3 {
+    font-family: var(--label);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  p { margin: 0 0 22px; }
+  p:last-child { margin-bottom: 0; }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  code { font-family: var(--mono); font-size: 0.83em; overflow-wrap: anywhere; }
+
+  em.lede {
+    font-style: normal;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--muted);
+    display: block;
+    text-wrap: pretty;
+  }
+
+  /* Hero -------------------------------------------------------------- */
+
+  .hero { padding-block: 64px 54px; }
+
+  .standfirst {
+    margin-top: 30px;
+    padding-top: 26px;
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px 44px;
+  }
+
+  .fact { display: flex; flex-direction: column; gap: 3px; }
+
+  .fact .value {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    font-size: 21px;
+    letter-spacing: -0.01em;
+  }
+
+  .fact .value.pending { color: var(--muted); }
+  .fact .value.good { color: var(--accent); }
+
+  /* Pipeline ---------------------------------------------------------- */
+
+  .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin-bottom: 26px; }
+
+  .step {
+    flex: 1 1 172px;
+    background: var(--raised);
+    border: 1px solid var(--hairline);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .step .kind { font-family: var(--label); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .step .name { font-size: 17px; font-weight: 600; line-height: 1.25; }
+  .step .detail { font-family: var(--mono); font-size: 11.5px; line-height: 1.45; color: var(--muted); overflow-wrap: anywhere; }
+  .step.moves { border-color: var(--accent); background: var(--accent-wash); }
+  .link { align-self: center; font-family: var(--mono); color: var(--muted); }
+
+  .args {
+    border-left: 2px solid var(--accent);
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 24px;
+  }
+
+  .args div { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; overflow-wrap: anywhere; }
+  .args .key { color: var(--muted); }
+
+  /* Tables ------------------------------------------------------------ */
+
+  .table-wrap { overflow-x: auto; margin-bottom: 24px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 15px; line-height: 1.45; }
+
+  th, td { text-align: left; padding: 10px 18px 10px 0; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+
+  th {
+    font-family: var(--label);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  td.figure { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  blockquote {
+    margin: 0 0 24px;
+    padding-left: 22px;
+    border-left: 2px solid var(--accent);
+    font-size: 21px;
+    line-height: 1.5;
+    font-style: italic;
+  }
+
+  ul.plain { margin: 0 0 22px; padding-left: 21px; }
+  ul.plain li { margin-bottom: 10px; }
+
+  .halves { display: grid; grid-template-columns: repeat(auto-fit, minmax(258px, 1fr)); gap: 28px 40px; }
+
+  .half { border-top: 2px solid var(--accent); padding-top: 16px; }
+  .half p { font-size: 17px; line-height: 1.6; }
+  .half .path { font-family: var(--mono); font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+
+  footer { padding-block: 44px 72px; color: var(--muted); font-size: 15px; line-height: 1.6; }
+  footer ul { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+
+  @media (max-width: 620px) {
+    body { font-size: 18px; }
+    .link { display: none; }
+    .step { flex-basis: 100%; }
+    section { padding-block: 46px; }
+  }
+</style>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="#top">Polymarket <span>&rarr;</span> KeeperHub</a>
+    <nav>
+      <a href="#thesis">Thesis</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#limits">Limits</a>
+      <a href="#swap">What swaps</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+  <section class="hero">
+    <p class="label">Build note &middot; September 2026</p>
+    <h1>The Unexecuted Decision</h1>
+    <div class="measure">
+      <em class="lede">A resolved prediction market is a settled decision that nobody has executed yet. An agent writes the workflow that redeems it, a human reads the workflow, and the exact reviewed workflow runs.</em>
+    </div>
+    <div class="standfirst">
+      <div class="fact">
+        <span class="label">Contract checks</span>
+        <span class="value good">12 / 12</span>
+      </div>
+      <div class="fact">
+        <span class="label">Resolution latency</span>
+        <span class="value">0.9 min</span>
+      </div>
+      <div class="fact">
+        <span class="label">Redemptions executed</span>
+        <span class="value pending">0</span>
+      </div>
+      <div class="fact">
+        <span class="label">Chain</span>
+        <span class="value">Polygon 137</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="thesis">
+    <div class="measure">
+      <h2>The money stops moving when the argument ends</h2>
+      <p>When a Polymarket market resolves, the uncertainty is gone. The oracle has reported, the payout ratios are fixed on chain, and every outcome token has a known value: one pUSD for the winning side, zero for the other. And yet nothing moves. The collateral sits inside the Conditional Tokens contract until somebody sends a transaction that says, in effect, <em>yes, I would like the thing I already won</em>.</p>
+      <p>This is a strange category of work. Not a trade, because there is no counterparty and no price. Not a race, because there is no deadline: winning tokens stay redeemable forever. It is a chore, and chores get forgotten, which is why Polymarket runs an <code>AutoRedeemer</code> of its own. In a four thousand block sample it was the busiest redeemer on Polygon, with 19,914 redemptions. But it redeems for wallets Polymarket operates. A position held by an agent's treasury, a Safe, or a market maker's own wallet is not covered, and stays unredeemed until a person remembers.</p>
+      <p>A settled decision, a known amount, a call anyone can make, and nobody making it. That is a good shape for automation and an awkward one for an agent, because the agent is the least trustworthy participant in the transaction.</p>
+    </div>
+  </section>
+
+  <section id="workflow">
+    <div class="measure">
+      <h2>Four nodes, and no templates anywhere</h2>
+      <p>A workflow engine will happily let you write an argument as a template that resolves during execution. The moment you do, the thing the human reviewed stops being the thing that runs.</p>
+    </div>
+
+    <div class="chain">
+      <div class="step">
+        <span class="kind">Trigger</span>
+        <span class="name">Schedule</span>
+        <span class="detail">*/10 * * * *</span>
+      </div>
+      <span class="link">&rarr;</span>
+      <div class="step">
+        <span class="kind">Read</span>
+        <span class="name">Payout Denominator</span>
+        <span class="detail">payoutDenominator @ 0x4D97DC&hellip;476045</span>
+      </div>
+      <span class="link">&rarr;</span>
+      <div class="step">
+        <span class="kind">Condition</span>
+        <span class="name">Market Resolved</span>
+        <span class="detail">result &gt; 0</span>
+      </div>
+      <span class="link">&rarr;</span>
+      <div class="step moves">
+        <span class="kind">Write &middot; moves value</span>
+        <span class="name">Redeem Payout</span>
+        <span class="detail">redeemPositions @ 0xAdA100&hellip;8FcE1f</span>
+      </div>
+    </div>
+
+    <div class="args">
+      <div><span class="key">collateralToken</span> 0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB</div>
+      <div><span class="key">parentCollectionId</span> 0x0000&hellip;0000</div>
+      <div><span class="key">conditionId</span> 0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0</div>
+      <div><span class="key">indexSets</span> [1, 2]</div>
+    </div>
+
+    <div class="measure">
+      <p><code>payoutDenominator</code> is zero until the oracle reports and non-zero forever after, which makes it the narrowest on-chain fact meaning <em>this market is settled</em>. Everything the redeem call needs is fixed text, above, in the file the reviewer reads.</p>
+      <blockquote>The dry run covers the exact call that later executes, because there is no later interpretation for it to miss.</blockquote>
+      <p>KeeperHub's simulator makes the cost of the alternative concrete: it skips any node whose network, address, ABI, function or arguments contain a template, because it cannot know what those resolve to until upstream steps run. A templated workflow reviews as a shape and dry runs as nothing. A SHA-256 over the canonical workflow is recorded at authoring time; deployment refuses a plan whose hash changed after review, and the dry run re-reads the deployed workflow and compares hashes again. The claim is a check, not a promise.</p>
+    </div>
+  </section>
+
+  <section id="evidence">
+    <div class="measure">
+      <h2>One address that looked authoritative and was wrong</h2>
+      <p>No contract address or signature in this build was used on the strength of documentation alone. That rule earned its keep immediately.</p>
+      <p>Polymarket's docs give the standard collateral adapter as <code>0xAdA100Db&hellip;FcE1f</code>. The README of Polymarket's own <code>ctf-exchange-v2</code> repository gives <code>0xADa10087&hellip;09718</code>. Both are real, deployed, plausible contracts, and bytecode presence cannot separate them. Live behaviour can.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Fact</th><th>How it was settled</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Which adapter is live</td><td class="figure">7,166 vs 188 redemptions, same window</td></tr>
+          <tr><td>Adapter wiring</td><td>Its own <code>CONDITIONAL_TOKENS()</code>, <code>COLLATERAL_TOKEN()</code>, <code>USDCE()</code></td></tr>
+          <tr><td>Event signatures</td><td class="figure">Topics matched 1,573 and 41,407 live logs</td></tr>
+          <tr><td>Redeeming twice is safe</td><td>Source: a zero balance skips the burn and the transfer</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="measure">
+      <p>The repository README was last edited in April. An integration built from the more official looking source would have pointed at a deployment the world has moved off.</p>
+      <p>The last row matters more than it looks. A trigger that fires twice is a double spend in most designs. Here the framework skips any outcome where the caller's balance is zero and only transfers when the payout exceeds zero, and the collateral wrapper has no zero-amount guard. A second run moves nothing rather than reverting. Idempotency is a property of the contracts, confirmed by reading them, not a lock bolted on afterwards.</p>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="measure">
+      <h2>What the platform could not do, and what is still unproven</h2>
+      <p>The honest version of this workflow triggers on <code>ConditionResolution</code>, the settlement event itself. It does not, because KeeperHub's event trigger cannot filter on event arguments: its tracker reads a network, a contract, an ABI and an event name, and nothing else. Polymarket resolves roughly seven hundred markets an hour, so watching one market that way would wake the workflow for all of them and bill an execution each time, about 9,500 runs a day to catch one redemption.</p>
+      <p>So the default polls, which is the cheaper of two imperfect options and costs only latency, since redemption has no deadline. The event version is implemented anyway, carrying its cost warning in the code, for when filtering lands. KeeperHub's own issue tracker describes the better answer, a trigger that evaluates a contract read once per block; its evaluation core merged on 11 September but is not yet exposed through the public schema, the API or the builder.</p>
+      <p>And the part a reader should keep in front of them: <strong>no value has moved yet</strong>. The contract checks pass, the tests pass, the workflow authors and hashes and writes itself to a reviewable file, and none of that is a transaction. Execution needs an organization key and a funded wallet. Until then the audit trail reports zero runs rather than a sample row. The neg-risk adapter path is implemented and has never run against a neg-risk market, which is an untested branch inside the headline feature. One workflow watches one market, so a portfolio means a workflow per position.</p>
+    </div>
+  </section>
+
+  <section id="swap">
+    <div class="measure">
+      <h2>Two halves, joined by one composer</h2>
+      <p>Pointing this at a different live project means writing two modules against two interfaces and changing nothing else.</p>
+    </div>
+    <div class="halves">
+      <div class="half">
+        <h3>The resolution source</h3>
+        <p>Answers <em>has this decision settled</em>. Watches the Conditional Tokens contract rather than any particular oracle, so it is indifferent to whether a market took the two-hour optimistic path or the automated one that resolved six markets 0.9 minutes after they closed.</p>
+        <p class="path">src/resolution/types.ts</p>
+      </div>
+      <div class="half">
+        <h3>The payout</h3>
+        <p>Answers <em>which call moves the value</em>. One write node, every argument literal, the adapter chosen by the market's type. What it paid is read back from the redemption log on the receipt, not from the workflow's own report.</p>
+        <p class="path">src/payout/types.ts</p>
+      </div>
+    </div>
+    <div class="measure" style="margin-top: 28px;">
+      <p>The interesting claim is not that a redemption can be automated. It is that the part which knows about the outside world and the part which spends money can be kept separate enough that a person can read the second one in full before it runs.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p class="label">References</p>
+    <ul>
+      <li><a href="https://docs.polymarket.com/resources/contracts">Polymarket contract addresses and audits</a></li>
+      <li><a href="https://docs.polymarket.com/concepts/resolution">Polymarket resolution and redemption</a></li>
+      <li><a href="https://docs.keeperhub.com/plugins/web3">KeeperHub Web3 plugin</a></li>
+      <li><a href="https://docs.keeperhub.com/agent/mcp-server">KeeperHub MCP server</a></li>
+      <li><a href="https://github.com/gnosis/conditional-tokens-contracts">Conditional Tokens Framework</a></li>
+      <li><a href="https://github.com/Polymarket/ctf-exchange-v2">Polymarket collateral adapter source</a></li>
+    </ul>
+  </footer>
+</main>
