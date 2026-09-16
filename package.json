@@ -1,5 +1,5 @@
 {
-  "name": "polymarket-keeperhub-redeemer",
+  "name": "vertex",
   "version": "1.0.0",
   "scripts": {
     "test": "node --import tsx --test test/*.test.ts",
@@ -7,7 +7,7 @@
     "cli": "tsx src/cli.ts"
   },
   "license": "MIT",
-  "description": "Redeem resolved Polymarket positions through a reviewed, dry-run KeeperHub workflow",
+  "description": "Vertex redeems resolved Polymarket positions through a reviewed, dry-run KeeperHub workflow",
   "type": "module",
   "dependencies": {
     "viem": "^2.56.5"

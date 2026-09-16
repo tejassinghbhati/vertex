@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vertex</title>
+<meta name="description" content="Vertex redeems resolved Polymarket positions through a reviewed KeeperHub workflow whose arguments are all literals.">
+<meta property="og:title" content="Vertex">
+<meta property="og:description" content="A resolved prediction market is a settled decision nobody has executed yet. Vertex executes it deterministically.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2331507E'/%3E%3Cpath d='M8 9l8 15 8-15' fill='none' stroke='%23FAFAF9' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<a class="skip" href="#thesis">Skip to content</a>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="wordmark" href="#top">Vertex</a>
+    <nav aria-label="Sections">
+      <a href="#thesis">Thesis</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#limits">Limits</a>
+      <a href="#run">Run it</a>
+      <a href="dashboard.html">Ledger</a>
+    </nav>
+    <button class="theme" type="button" id="theme-toggle" aria-live="polite">Dark</button>
+  </div>
+</header>
+
+<main class="wrap" id="top">
+
+  <section class="hero">
+    <p class="label">Polymarket &rarr; KeeperHub &middot; September 2026</p>
+    <h1>Vertex</h1>
+    <div class="measure">
+      <p class="lede">A resolved prediction market is a settled decision that nobody has executed yet. An agent authors the workflow that redeems it, a human reads that workflow, and the exact reviewed workflow runs.</p>
+    </div>
+    <div class="standfirst">
+      <div class="fact">
+        <span class="label">Contract checks</span>
+        <span class="value good">12 / 12</span>
+      </div>
+      <div class="fact">
+        <span class="label">Resolution latency</span>
+        <span class="value">0.9 min</span>
+      </div>
+      <div class="fact">
+        <span class="label">Redemptions executed</span>
+        <span class="value pending">0</span>
+      </div>
+      <div class="fact">
+        <span class="label">Chain</span>
+        <span class="value">Polygon 137</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="thesis">
+    <div class="measure">
+      <h2>The money stops moving when the argument ends</h2>
+      <p>When a Polymarket market resolves, the uncertainty is gone. The oracle has reported, the payout ratios are fixed on chain, and every outcome token has a known value: one pUSD for the winning side, zero for the other. And yet nothing moves. The collateral sits inside the Conditional Tokens contract until somebody sends a transaction that says, in effect, <em>yes, I would like the thing I already won</em>.</p>
+      <p>This is a strange category of work. Not a trade, because there is no counterparty and no price. Not a race, because there is no deadline: winning tokens stay redeemable forever. It is a chore, and chores get forgotten, which is why Polymarket runs an <code>AutoRedeemer</code> of its own. In a four thousand block sample it was the busiest redeemer on Polygon, with 19,914 redemptions. But it redeems for wallets Polymarket operates. A position held by an agent's treasury, a Safe, or a market maker's own wallet is not covered, and stays unredeemed until a person remembers.</p>
+      <p>A settled decision, a known amount, a call anyone can make, and nobody making it. That is a good shape for automation and an awkward one for an agent, because the agent is the least trustworthy participant in the transaction.</p>
+    </div>
+  </section>
+
+  <section id="workflow">
+    <div class="measure">
+      <h2>Four nodes, and no templates anywhere</h2>
+      <p>A workflow engine will happily let you write an argument as a template that resolves during execution. The moment you do, the thing the human reviewed stops being the thing that runs.</p>
+    </div>
+
+    <ol class="chain" aria-label="Workflow steps">
+      <li class="step">
+        <span class="kind">Trigger</span>
+        <span class="name">Schedule</span>
+        <span class="detail">*/10 * * * *</span>
+      </li>
+      <li class="step">
+        <span class="kind">Read</span>
+        <span class="name">Payout Denominator</span>
+        <span class="detail">payoutDenominator @ 0x4D97DC&hellip;476045</span>
+      </li>
+      <li class="step">
+        <span class="kind">Condition</span>
+        <span class="name">Market Resolved</span>
+        <span class="detail">result &gt; 0</span>
+      </li>
+      <li class="step moves">
+        <span class="kind">Write &middot; moves value</span>
+        <span class="name">Redeem Payout</span>
+        <span class="detail">redeemPositions @ 0xAdA100&hellip;8FcE1f</span>
+      </li>
+    </ol>
+
+    <dl class="args" aria-label="Redeem call arguments">
+      <div class="arg">
+        <dt>collateralToken</dt>
+        <dd data-copy="0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB">0xC011a7E12a19f7B1f670d46F03B03f3342E82DFB</dd>
+      </div>
+      <div class="arg">
+        <dt>parentCollectionId</dt>
+        <dd data-copy="0x0000000000000000000000000000000000000000000000000000000000000000">0x0000&hellip;0000</dd>
+      </div>
+      <div class="arg">
+        <dt>conditionId</dt>
+        <dd data-copy="0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0">0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0</dd>
+      </div>
+      <div class="arg">
+        <dt>indexSets</dt>
+        <dd data-copy="[1, 2]">[1, 2]</dd>
+      </div>
+    </dl>
+
+    <div class="measure">
+      <p><code>payoutDenominator</code> is zero until the oracle reports and non-zero forever after, which makes it the narrowest on-chain fact meaning <em>this market is settled</em>. Everything the redeem call needs is fixed text, above, in the file the reviewer reads.</p>
+      <blockquote>The dry run covers the exact call that later executes, because there is no later interpretation for it to miss.</blockquote>
+      <p>KeeperHub's simulator makes the cost of the alternative concrete: it skips any node whose network, address, ABI, function or arguments contain a template, because it cannot know what those resolve to until upstream steps run. A templated workflow reviews as a shape and dry runs as nothing. Vertex records a SHA-256 over the canonical workflow at authoring time; deployment refuses a plan whose hash changed after review, and the dry run re-reads the deployed workflow and compares hashes again. The claim is a check, not a promise.</p>
+    </div>
+  </section>
+
+  <section id="evidence">
+    <div class="measure">
+      <h2>One address that looked authoritative and was wrong</h2>
+      <p>No contract address or signature in this build was used on the strength of documentation alone. That rule earned its keep immediately.</p>
+      <p>Polymarket's docs give the standard collateral adapter as <code>0xAdA100Db&hellip;FcE1f</code>. The README of Polymarket's own <code>ctf-exchange-v2</code> repository gives <code>0xADa10087&hellip;09718</code>. Both are real, deployed, plausible contracts, and bytecode presence cannot separate them. Live behaviour can.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption>Checked against Polygon mainnet, not against a docs page</caption>
+        <thead>
+          <tr><th scope="col">Fact</th><th scope="col">How it was settled</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Which adapter is live</td><td class="figure">7,166 vs 188 redemptions, same window</td></tr>
+          <tr><td>Adapter wiring</td><td>Its own <code>CONDITIONAL_TOKENS()</code>, <code>COLLATERAL_TOKEN()</code>, <code>USDCE()</code></td></tr>
+          <tr><td>Event signatures</td><td class="figure">Topics matched 1,573 and 41,407 live logs</td></tr>
+          <tr><td>Redeeming twice is safe</td><td>Source: a zero balance skips the burn and the transfer</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="measure">
+      <p>The repository README was last edited in April. An integration built from the more official looking source would have pointed at a deployment the world has moved off.</p>
+      <p>The last row matters more than it looks. A trigger that fires twice is a double spend in most designs. Here the framework skips any outcome where the caller's balance is zero and only transfers when the payout exceeds zero, and the collateral wrapper has no zero-amount guard. A second run moves nothing rather than reverting. Idempotency is a property of the contracts, confirmed by reading them, not a lock bolted on afterwards.</p>
+    </div>
+  </section>
+
+  <section id="limits">
+    <div class="measure">
+      <h2>What the platform could not do, and what is still unproven</h2>
+      <p>The honest version of this workflow triggers on <code>ConditionResolution</code>, the settlement event itself. It does not, because KeeperHub's event trigger cannot filter on event arguments: its tracker reads a network, a contract, an ABI and an event name, and nothing else. Polymarket resolves roughly seven hundred markets an hour, so watching one market that way would wake the workflow for all of them and bill an execution each time, about 9,500 runs a day to catch one redemption.</p>
+      <p>So the default polls, which is the cheaper of two imperfect options and costs only latency, since redemption has no deadline. The event version is implemented anyway, carrying its cost warning in the code, for when filtering lands. KeeperHub's own issue tracker describes the better answer, a trigger that evaluates a contract read once per block; its evaluation core merged on 11 September but is not yet exposed through the public schema, the API or the builder.</p>
+      <p>And the part a reader should keep in front of them: <strong>no value has moved yet</strong>. The contract checks pass, the tests pass, the workflow authors and hashes and writes itself to a reviewable file, and none of that is a transaction. Execution needs a KeeperHub organization key and a funded wallet. Until then the ledger reports zero runs rather than a sample row. The neg-risk adapter path is implemented and has never run against a neg-risk market, which is an untested branch inside the headline feature. One workflow watches one market, so a portfolio means a workflow per position.</p>
+    </div>
+  </section>
+
+  <section id="swap">
+    <div class="measure">
+      <h2>Two halves, joined by one composer</h2>
+      <p>Pointing Vertex at a different live project means writing two modules against two interfaces and changing nothing else.</p>
+    </div>
+    <div class="halves">
+      <div class="half">
+        <h3>The resolution source</h3>
+        <p>Answers <em>has this decision settled</em>. Watches the Conditional Tokens contract rather than any particular oracle, so it is indifferent to whether a market took the two-hour optimistic path or the automated one that resolved six markets 0.9 minutes after they closed.</p>
+        <p class="path">src/resolution/types.ts</p>
+      </div>
+      <div class="half">
+        <h3>The payout</h3>
+        <p>Answers <em>which call moves the value</em>. One write node, every argument literal, the adapter chosen by the market's type. What it paid is read back from the redemption log on the receipt, not from the workflow's own report.</p>
+        <p class="path">src/payout/types.ts</p>
+      </div>
+    </div>
+    <div class="measure trailing">
+      <p>The interesting claim is not that a redemption can be automated. It is that the part which knows about the outside world and the part which spends money can be kept separate enough that a person can read the second one in full before it runs.</p>
+    </div>
+  </section>
+
+  <section id="run">
+    <div class="measure">
+      <h2>Run it</h2>
+      <p>Node 22 and a KeeperHub organization key. The first command needs neither.</p>
+    </div>
+    <div class="terminal">
+<pre><code>npm install
+cp .env.example .env            <span class="c"># add a kh_ organization key</span>
+
+npm run cli verify              <span class="c"># check every address against Polygon</span>
+npm run cli plan -- --slug &lt;market-slug&gt;
+npm run cli preflight -- --plan workflows/&lt;f&gt;
+npm run cli deploy -- --plan workflows/&lt;f&gt;   <span class="c"># created disabled</span>
+npm run cli dry-run -- --plan workflows/&lt;f&gt;  <span class="c"># nothing is broadcast</span>
+npm run cli arm -- --plan workflows/&lt;f&gt;
+
+npm run cli status              <span class="c"># the audit trail</span>
+npm run cli dashboard           <span class="c"># the ledger page</span></code></pre>
+    </div>
+    <div class="measure">
+      <p><code>deploy</code> refuses a plan whose hash differs from the reviewed one, and <code>dry-run</code> re-reads the deployed workflow and compares hashes again. Every run is appended to <code>audit/runs.json</code> keyed by execution id, and what a redemption paid is decoded from the <code>PayoutRedemption</code> log rather than taken from the workflow's own report.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p class="label">References</p>
+  <ul>
+    <li><a href="https://docs.polymarket.com/resources/contracts">Polymarket contract addresses and audits</a></li>
+    <li><a href="https://docs.polymarket.com/concepts/resolution">Polymarket resolution and redemption</a></li>
+    <li><a href="https://docs.keeperhub.com/plugins/web3">KeeperHub Web3 plugin</a></li>
+    <li><a href="https://docs.keeperhub.com/agent/mcp-server">KeeperHub MCP server</a></li>
+    <li><a href="https://github.com/gnosis/conditional-tokens-contracts">Conditional Tokens Framework</a></li>
+    <li><a href="https://github.com/Polymarket/ctf-exchange-v2">Polymarket collateral adapter source</a></li>
+  </ul>
+</footer>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>

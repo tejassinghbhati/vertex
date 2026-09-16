@@ -69,7 +69,7 @@ async function main() {
 }
 
 function usage() {
-  console.log(`polymarket-keeperhub-redeemer
+  console.log(`vertex
 
   verify                                  check every contract address against Polygon
   plan --slug <s> | --condition <0x..>    author the workflow and write it to ${PLAN_DIR}/

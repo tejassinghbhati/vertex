@@ -30,7 +30,7 @@ export function renderDashboard(input: DashboardInput): string {
   const s = summarize(input.audit);
   const checksOk = input.checks.filter((c) => c.ok).length;
 
-  return `<title>Redemption Ledger</title>
+  return `<title>Vertex Ledger</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
 <style>
@@ -177,7 +177,7 @@ footer { color: var(--muted); font-size: 12.5px; display: flex; flex-direction: 
 
 <div class="page">
   <header class="section">
-    <h1>Redemption Ledger</h1>
+    <h1>Vertex Ledger</h1>
     <p class="lede">A resolved Polymarket market is a settled decision nobody has executed yet. This is the execution record: what was reviewed, what was dry run, and what actually moved on Polygon.</p>
   </header>
 
