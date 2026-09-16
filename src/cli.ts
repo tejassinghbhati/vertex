@@ -13,6 +13,7 @@ import { marketPreflight, polygonClient, verifyContracts, type Check } from "./c
 import { redeemedPayout } from "./chain/payout-value.js";
 import { appendRun, formatPusd, loadAudit, summarize } from "./audit/record.js";
 import { renderDashboard, type PlanLike } from "./audit/dashboard.js";
+import { buildSiteState } from "./audit/site-state.js";
 import type { ResolutionSource } from "./resolution/types.js";
 
 try {
@@ -260,11 +261,18 @@ async function cmdDashboard(flags: Flags) {
 
   // Checks are read live so the page cannot claim a verification it did not do.
   const checks = await verifyContracts(polygonClient());
-  const html = renderDashboard({ generatedAt: new Date().toISOString(), audit: loadAudit(), plans, checks });
+  const audit = loadAudit();
+  const generatedAt = new Date().toISOString();
+  const html = renderDashboard({ generatedAt, audit, plans, checks });
 
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, html);
-  console.log(`Wrote ${out} (${plans.length} plan(s), ${loadAudit().runs.length} run(s), ${checks.filter((c) => c.ok).length}/${checks.length} checks passing)`);
+
+  // The site is static, so the workflow diagram reads its state from here.
+  const statePath = join(dirname(out), "state.json");
+  writeFileSync(statePath, `${JSON.stringify(buildSiteState({ generatedAt, audit, plans, checks }), null, 2)}\n`);
+
+  console.log(`Wrote ${out} and ${statePath} (${plans.length} plan(s), ${audit.runs.length} run(s), ${checks.filter((c) => c.ok).length}/${checks.length} checks passing)`);
 }
 
 async function cmdSetup(workflow: WorkflowDefinition, flags: Flags) {

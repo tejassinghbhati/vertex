@@ -75,28 +75,60 @@
       <p>A workflow engine will happily let you write an argument as a template that resolves during execution. The moment you do, the thing the human reviewed stops being the thing that runs.</p>
     </div>
 
-    <ol class="chain" aria-label="Workflow steps">
-      <li class="step">
-        <span class="kind">Trigger</span>
-        <span class="name">Schedule</span>
-        <span class="detail">*/10 * * * *</span>
-      </li>
-      <li class="step">
-        <span class="kind">Read</span>
-        <span class="name">Payout Denominator</span>
-        <span class="detail">payoutDenominator @ 0x4D97DC&hellip;476045</span>
-      </li>
-      <li class="step">
-        <span class="kind">Condition</span>
-        <span class="name">Market Resolved</span>
-        <span class="detail">result &gt; 0</span>
-      </li>
-      <li class="step moves">
-        <span class="kind">Write &middot; moves value</span>
-        <span class="name">Redeem Payout</span>
-        <span class="detail">redeemPositions @ 0xAdA100&hellip;8FcE1f</span>
-      </li>
-    </ol>
+    <div class="stage">
+      <p class="stage-state" id="stage-state">state: no runs recorded</p>
+      <div class="stage-grid" id="stage-grid">
+        <div class="node" data-node="trigger">
+          <span class="kind">Trigger</span>
+          <span class="name">Schedule</span>
+          <span class="detail">*/10 * * * *</span>
+          <span class="node-state" data-state-for="trigger">idle</span>
+        </div>
+        <div class="node" data-node="read">
+          <span class="kind">Read</span>
+          <span class="name">Payout Denominator</span>
+          <span class="detail">payoutDenominator @ 0x4D97DC&hellip;476045</span>
+          <span class="node-state" data-state-for="read">idle</span>
+        </div>
+        <div class="node" data-node="condition">
+          <span class="kind">Condition</span>
+          <span class="name">Market Resolved</span>
+          <span class="detail">result &gt; 0</span>
+          <span class="node-state" data-state-for="condition">idle</span>
+        </div>
+        <div class="node moves" data-node="payout">
+          <span class="kind">Write &middot; moves value</span>
+          <span class="name">Redeem Payout</span>
+          <span class="detail">redeemPositions @ 0xAdA100&hellip;8FcE1f</span>
+          <span class="node-state" data-state-for="payout">idle</span>
+        </div>
+        <div class="node quiet" data-node="end">
+          <span class="kind">False branch</span>
+          <span class="name">Run ends</span>
+          <span class="detail">nothing written</span>
+          <span class="node-state" data-state-for="end">idle</span>
+        </div>
+      </div>
+      <svg class="edges" id="edges" aria-hidden="true"></svg>
+      <p class="stage-key">Edge weight carries state: hairline is untravelled, solid is a path a run took, thick is the step that moved value. A dashed edge is the branch this run did not take.</p>
+    </div>
+
+    <dl class="strip" id="strip">
+      <div class="strip-row">
+        <dt>reviewed hash</dt>
+        <dd class="mono" id="hash-reviewed">not authored</dd>
+        <dt>deployed hash</dt>
+        <dd class="mono" id="hash-deployed">no deployment</dd>
+        <dd class="verdict" id="hash-verdict">unproven</dd>
+      </div>
+      <div class="strip-row">
+        <dt>run reported</dt>
+        <dd class="mono" id="payout-reported">no runs</dd>
+        <dt>chain says</dt>
+        <dd class="mono" id="payout-onchain">no runs</dd>
+        <dd class="verdict" id="payout-verdict">unproven</dd>
+      </div>
+    </dl>
 
     <dl class="args" aria-label="Redeem call arguments">
       <div class="arg">

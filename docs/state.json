@@ -1,0 +1,33 @@
+{
+  "generatedAt": "2026-09-16T15:27:18.915Z",
+  "market": {
+    "question": "Credible FDV above $100M one day after launch?",
+    "conditionId": "0x0c481aa63ec629535d90cc083c6d92ebcbe7b79581faf83f46ca3624c4e4eae0",
+    "negRisk": false
+  },
+  "hashes": {
+    "reviewed": "a9c1b99acf8584f2ab34c776efcab9e6caaf55e69a44cd155bfb0388f5b5636a",
+    "deployed": null,
+    "match": null
+  },
+  "runs": {
+    "total": 0,
+    "succeeded": 0,
+    "failed": 0,
+    "redemptions": 0,
+    "payoutPusd": "0.000000"
+  },
+  "lastRun": null,
+  "nodes": {
+    "trigger": "idle",
+    "read": "idle",
+    "condition": "idle",
+    "payout": "idle",
+    "end": "idle"
+  },
+  "branch": "none",
+  "checks": {
+    "passing": 12,
+    "total": 12
+  }
+}

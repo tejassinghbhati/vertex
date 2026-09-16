@@ -10,6 +10,7 @@
   --hairline: #E3E2DE;
   --accent: #31507E;
   --accent-wash: #EDF1F7;
+  --crit: #B3261E;
   --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   --label: "Archivo", "Helvetica Neue", Arial, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
@@ -24,6 +25,7 @@
     --hairline: #262A31;
     --accent: #9CB4DF;
     --accent-wash: #171C25;
+    --crit: #F08279;
   }
 }
 
@@ -35,6 +37,7 @@
   --hairline: #262A31;
   --accent: #9CB4DF;
   --accent-wash: #171C25;
+  --crit: #F08279;
 }
 
 * { box-sizing: border-box; }
@@ -265,17 +268,42 @@ blockquote {
 
 /* Workflow ------------------------------------------------------------ */
 
-.chain {
-  list-style: none;
-  margin: 0 0 26px;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+/* The diagram is DOM nodes with an SVG overlay drawing the edges between
+   them, so the nodes stay selectable text and the edges survive reflow.
+   State is carried by weight and dash, never by hue. */
+
+.stage { position: relative; margin-bottom: 26px; }
+
+.stage-state {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: var(--muted);
+  margin: 0 0 12px;
 }
 
-.step {
-  flex: 1 1 172px;
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px 26px;
+  position: relative;
+  z-index: 2;
+}
+
+.stage-grid .node[data-node="end"] { grid-column: 3; }
+
+.edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.node {
   background: var(--raised);
   border: 1px solid var(--hairline);
   padding: 14px 16px;
@@ -284,7 +312,73 @@ blockquote {
   gap: 5px;
 }
 
-.step .kind {
+.node.quiet { background: transparent; border-style: dashed; }
+
+.node-state {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.node.is-ran { border-color: var(--muted); }
+.node.is-fired { border-color: var(--accent); border-width: 2px; }
+.node.is-failed { border-color: var(--crit, #B3261E); border-width: 2px; }
+.node.is-skipped { opacity: 0.62; }
+
+.stage-key {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 18px 0 0;
+  max-width: 52ch;
+}
+
+/* Expected against actual: the two claims this project has to survive. */
+
+.strip {
+  margin: 0 0 26px;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.strip-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+}
+
+.strip dt {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  color: var(--muted);
+}
+
+.strip dd { margin: 0; font-size: 14px; }
+.strip .mono { font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; }
+
+.strip .verdict {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--hairline);
+  padding: 1px 7px;
+  color: var(--muted);
+}
+
+.strip .verdict.match { border-color: var(--accent); color: var(--accent); }
+.strip .verdict.mismatch { border-color: var(--crit, #B3261E); color: var(--crit, #B3261E); }
+
+.node .kind {
   font-family: var(--label);
   font-size: 10px;
   font-weight: 600;
@@ -293,9 +387,9 @@ blockquote {
   color: var(--muted);
 }
 
-.step .name { font-size: 17px; font-weight: 600; line-height: 1.25; }
+.node .name { font-size: 17px; font-weight: 600; line-height: 1.25; }
 
-.step .detail {
+.node .detail {
   font-family: var(--mono);
   font-size: 11.5px;
   line-height: 1.45;
@@ -303,7 +397,7 @@ blockquote {
   overflow-wrap: anywhere;
 }
 
-.step.moves {
+.node.moves {
   border-color: var(--accent);
   background: var(--accent-wash);
 }
@@ -451,8 +545,9 @@ footer ul {
 
 @media (max-width: 620px) {
   body { font-size: 18px; }
-  .step { flex-basis: 100%; }
   section { padding-block: 46px; }
   .args dt { min-width: 0; }
   nav { gap: 6px 16px; }
+  .stage-grid { grid-template-columns: minmax(0, 1fr); }
+  .stage-grid .node[data-node="end"] { grid-column: 1; }
 }
